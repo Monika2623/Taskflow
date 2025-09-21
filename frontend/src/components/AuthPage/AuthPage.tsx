@@ -8,10 +8,10 @@ type AuthPageProps = {
   onAuth: () => void;
 };
 
-// Simple username/password login to obtain JWT from Django
-
 const AuthPage: React.FC<AuthPageProps> = ({ onAuth }) => {
   const navigate = useNavigate();
+
+  // Empty by default
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,10 +25,18 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuth }) => {
       const tokens = await login(username, password);
       localStorage.setItem("accessToken", tokens.access);
       localStorage.setItem("refreshToken", tokens.refresh);
+
+      // Clear fields after login if you want
+      setUsername("");
+      setPassword("");
+
       onAuth();
       navigate("/your-work", { replace: true });
     } catch (e: any) {
       setErr(e?.message || "Login failed");
+
+      // Clear the password field on error
+      setPassword("");
     }
     setLoading(false);
   };
@@ -37,10 +45,9 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuth }) => {
     <div className="auth-container">
       <AuthBackground />
       <div className="auth-box">
-        <h1 className="auth-title">TaskFlow </h1>
+        <h1 className="auth-title">TaskFlow</h1>
         <p className="auth-subtitle">Sign in with your E-mail</p>
-
-        <form onSubmit={handleLogin}>
+        <form onSubmit={handleLogin} autoComplete="off">
           <input
             type="text"
             required
@@ -48,7 +55,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuth }) => {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="auth-input"
-            autoFocus
+            autoComplete="off" // disable browser autofill
           />
           <input
             type="password"
@@ -57,6 +64,7 @@ const AuthPage: React.FC<AuthPageProps> = ({ onAuth }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="auth-input"
+            autoComplete="new-password" // disable browser autofill
           />
           {err && <p className="auth-error">{err}</p>}
           <button disabled={loading} className="auth-button cool-mode">
